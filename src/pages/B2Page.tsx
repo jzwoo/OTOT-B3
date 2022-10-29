@@ -1,11 +1,15 @@
 import React, {useState} from 'react';
-import {Button, Col, Popconfirm, Row, Space, Spin, Table} from 'antd';
+import {Button, Col, Popconfirm, Row, Space, Table} from 'antd';
 import API from '../api/api-types';
 import {deleteContactById, getContacts} from '../api/contacts-api';
+import EditContactModal from '../components/EditContactModal';
 
 const B2Page: React.FC = () => {
   const [contacts, setContacts] = useState<API.Contact[]>()
   const [loading, setLoading] = useState(false)
+
+  const [contactToBeEdited, setContactToBeEdited] = useState<API.Contact>();
+  const [openEditModal, setOpenEditModal] = useState(false);
 
   const handleGetContacts = () => {
     setLoading(true);
@@ -39,6 +43,11 @@ const B2Page: React.FC = () => {
     setContacts([]);
   }
 
+  const handleOpenEditModal = (contact: API.Contact) => {
+    setContactToBeEdited(contact);
+    setOpenEditModal(true)
+  }
+
   const columns = [
     {
       title: 'Name',
@@ -53,14 +62,16 @@ const B2Page: React.FC = () => {
     {
       title: 'Action',
       key: 'action',
+      width: 200,
+      fixed: true,
       render: (_: any, contact: API.Contact) => (
-        <Space size="middle">
-          <Button type="link">
+        <Space size="middle" align="center">
+          <Button type="link" onClick={() => handleOpenEditModal(contact)}>
             Edit
           </Button>
 
           <Popconfirm
-            title="Are you sure you want to delete the contact?"
+            title="Are you sure you want to delete this contact?"
             onConfirm={() => handleDeleteContact(contact._id)}
             okText="Yes"
             cancelText="No"
@@ -71,10 +82,6 @@ const B2Page: React.FC = () => {
       )
     }
   ];
-
-  if (loading) {
-    return <Spin/>
-  }
 
   return (
     <Row gutter={[10, 24]} justify="start">
@@ -91,8 +98,12 @@ const B2Page: React.FC = () => {
       </Col>
 
       <Col span={24}>
-        <Table dataSource={contacts} columns={columns} rowKey={(contact) => contact._id}/>
+        <Table dataSource={contacts} columns={columns} rowKey={(contact) => contact._id} loading={loading}/>
       </Col>
+
+      {contactToBeEdited &&
+          <EditContactModal open={openEditModal} setOpen={setOpenEditModal} toBeEdited={contactToBeEdited}
+                            callBack={handleGetContacts}/>}
     </Row>
   )
 }

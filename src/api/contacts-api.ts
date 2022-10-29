@@ -13,3 +13,7 @@ export const getContactByName = (name: string): Promise<API.Response<API.Contact
 export const deleteContactById = (id: number): Promise<API.Response<API.Message>> => {
   return requests.delete(URI_CONTACTS, '/' + id);
 }
+
+export const editContactById = (id: number, body: { name: string, contact: number }): Promise<API.Response<API.Message>> => {
+  return requests.put(URI_CONTACTS, '/' + id, body);
+}
