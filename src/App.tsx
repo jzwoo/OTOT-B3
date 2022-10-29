@@ -1,26 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {FC} from 'react';
 import './App.css';
+import {Tabs} from 'antd';
+import B2Page from './pages/B2Page';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App: FC = () => (
+  <div className="App">
+    <Tabs defaultActiveKey="1">
+      <Tabs.TabPane tab="OTOT-B2.2" key="1">
+        <B2Page/>
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="OTOT-B4" key="2">
+        Content of Tab Pane 2
+      </Tabs.TabPane>
+    </Tabs>
+  </div>
+);
 
 export default App;
