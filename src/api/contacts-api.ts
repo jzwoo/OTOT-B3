@@ -6,8 +6,12 @@ export const getContacts = (): Promise<API.Response<API.Contact[]>> => {
   return requests.get(URI_CONTACTS, '');
 }
 
-export const getContactByName = (name: string): Promise<API.Response<API.Contact[]>> => {
+export const getContactByName = (name: string): Promise<API.Response<API.Contact>> => {
   return requests.get(URI_CONTACTS, '/name?name=' + name);
+}
+
+export const addNewContact = (newContact: API.Contact): Promise<API.Response<API.Contact>> => {
+  return requests.post(URI_CONTACTS, '/', newContact);
 }
 
 export const deleteContactById = (id: number): Promise<API.Response<API.Message>> => {

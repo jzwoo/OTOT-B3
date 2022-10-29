@@ -1,33 +1,23 @@
 import React, {useState} from 'react';
 import {Col, Form, Input, InputNumber, Modal, Row} from 'antd';
 import API from '../api/api-types';
-import {editContactById} from '../api/contacts-api';
+import {addNewContact} from '../api/contacts-api';
 
-type EditContactModalProp = {
+type AddContactModalProp = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  toBeEdited: API.Contact;
   callBack: () => void;
 }
 
-const EditContactModal: React.FC<EditContactModalProp> = (props: EditContactModalProp) => {
-  const {open, setOpen, toBeEdited, callBack} = props
+const AddContactModal: React.FC<AddContactModalProp> = (props: AddContactModalProp) => {
+  const {open, setOpen, callBack} = props
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(false)
 
-  const handleFormSubmit = (values: API.Contact) => {
-    console.log(values)
-    const editedName = values.name
-    const editedContact = values.contact
-
-    if (!editedName || !editedContact) {
-      console.log('err')
-      return
-    }
-
+  const handleFormSubmit = (newContact: API.Contact) => {
     setLoading(true)
-    editContactById(toBeEdited._id, {name: editedName, contact: editedContact}).then((res) => {
+    addNewContact(newContact).then((res) => {
       if (res.status !== 200) {
         console.log(res.statusText)
         setLoading(false)
@@ -35,7 +25,7 @@ const EditContactModal: React.FC<EditContactModalProp> = (props: EditContactModa
       }
 
       setLoading(false)
-      setOpen(false);
+      setOpen(false)
       callBack();
     })
   }
@@ -53,9 +43,6 @@ const EditContactModal: React.FC<EditContactModalProp> = (props: EditContactModa
         form={form}
         labelCol={{
           span: 24,
-        }}
-        initialValues={{
-          ...toBeEdited
         }}
         autoComplete="off"
         requiredMark={false}
@@ -100,4 +87,4 @@ const EditContactModal: React.FC<EditContactModalProp> = (props: EditContactModa
   )
 }
 
-export default EditContactModal
+export default AddContactModal

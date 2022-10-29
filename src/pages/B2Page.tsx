@@ -1,8 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Col, Popconfirm, Row, Space, Table} from 'antd';
 import API from '../api/api-types';
-import {deleteContactById, getContacts} from '../api/contacts-api';
-import EditContactModal from '../components/EditContactModal';
+import {deleteContactById, getContactByName, getContacts} from '../api/contacts-api';
+import EditContactModal from '../components/editContactModal';
+import AddContactModal from '../components/addContactModal';
+import Search from 'antd/es/input/Search';
 
 const B2Page: React.FC = () => {
   const [contacts, setContacts] = useState<API.Contact[]>()
@@ -10,6 +12,7 @@ const B2Page: React.FC = () => {
 
   const [contactToBeEdited, setContactToBeEdited] = useState<API.Contact>();
   const [openEditModal, setOpenEditModal] = useState(false);
+  const [openAddModal, setOpenAddModal] = useState(false);
 
   const handleGetContacts = () => {
     setLoading(true);
@@ -25,8 +28,28 @@ const B2Page: React.FC = () => {
     })
   }
 
+  const handleOnSearch = (name: string) => {
+    setLoading(true)
+    getContactByName(name).then((res) => {
+      if (res.status === 404) {
+        setContacts([])
+        setLoading(false);
+        return
+      }
+
+      if (res.status !== 200) {
+        console.log('error')
+        setLoading(false);
+        return
+      }
+
+      setContacts([res.data])
+      setLoading(false);
+    })
+  }
+
   const handleDeleteContact = (id: number) => {
-    setLoading(loading);
+    setLoading(true);
     deleteContactById(id).then((res) => {
       if (res.status !== 200) {
         console.log('error')
@@ -36,6 +59,7 @@ const B2Page: React.FC = () => {
 
       const filteredContacts = contacts?.filter((contact) => contact._id !== id)
       setContacts(filteredContacts)
+      setLoading(false);
     })
   }
 
@@ -44,8 +68,12 @@ const B2Page: React.FC = () => {
   }
 
   const handleOpenEditModal = (contact: API.Contact) => {
-    setContactToBeEdited(contact);
+    setContactToBeEdited(contact)
     setOpenEditModal(true)
+  }
+
+  const handleOpenAddModal = () => {
+    setOpenAddModal(true)
   }
 
   const columns = [
@@ -53,17 +81,18 @@ const B2Page: React.FC = () => {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      width: '40%',
     },
     {
       title: 'Contact',
       dataIndex: 'contact',
       key: 'contact',
+      width: '40%',
     },
     {
       title: 'Action',
       key: 'action',
-      width: 200,
-      fixed: true,
+      width: '15%',
       render: (_: any, contact: API.Contact) => (
         <Space size="middle" align="center">
           <Button type="link" onClick={() => handleOpenEditModal(contact)}>
@@ -84,26 +113,50 @@ const B2Page: React.FC = () => {
   ];
 
   return (
-    <Row gutter={[10, 24]} justify="start">
-      <Col flex="100px">
-        <Button type="primary" onClick={handleGetContacts}>
-          Get all contacts
-        </Button>
+    <Row gutter={[0, 24]} justify="space-between">
+      <Col flex="700px">
+        <Row gutter={[10, 24]} justify="start">
+          <Col flex="320px">
+            <Search placeholder={'Search by name'} onSearch={handleOnSearch} enterButton loading={loading}/>
+          </Col>
+
+          <Col flex="50px">
+            <Button type="primary" onClick={handleGetContacts} block>
+              Get all contacts
+            </Button>
+          </Col>
+
+          <Col flex="50px">
+            <Button onClick={handleClearContacts} block>
+              Clear
+            </Button>
+          </Col>
+        </Row>
       </Col>
 
       <Col flex="100px">
-        <Button type="primary" onClick={handleClearContacts}>
-          Clear contacts
+        <Button type="primary" onClick={handleOpenAddModal}>
+          Add contact
         </Button>
       </Col>
 
       <Col span={24}>
-        <Table dataSource={contacts} columns={columns} rowKey={(contact) => contact._id} loading={loading}/>
+        <Table
+          dataSource={contacts}
+          columns={columns}
+          rowKey={(contact) => contact._id}
+          loading={loading}
+          pagination={{
+            pageSize: 8
+          }}
+        />
       </Col>
 
-      {contactToBeEdited &&
+      {contactToBeEdited && openEditModal &&
           <EditContactModal open={openEditModal} setOpen={setOpenEditModal} toBeEdited={contactToBeEdited}
                             callBack={handleGetContacts}/>}
+
+      <AddContactModal open={openAddModal} setOpen={setOpenAddModal} callBack={handleGetContacts}/>
     </Row>
   )
 }
