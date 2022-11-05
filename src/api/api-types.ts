@@ -14,6 +14,11 @@ declare namespace API {
   type Message = {
     message: string;
   }
+
+  type CurrencyRate = {
+    symbol: string;
+    rate: number;
+  }
 }
 
 export default API;
